@@ -3,10 +3,12 @@ var Engine = Matter.Engine,
     World = Matter.World,
     Bodies = Matter.Bodies
 
+var Constraint = Matter.Constraint;
+
 var engine;
-var box1;
-var ground1, ground2;
-var boxes = [];
+var ground;
+var constraint1;
+var poly1A, poly1B;
 
 function setup() {
     createCanvas(900, 600);
@@ -15,50 +17,41 @@ function setup() {
     engine = Engine.create()
 
     // Define shapes as Bodies instances
-    box1 = Bodies.rectangle(200, 200, 80, 80, {restitution: .8, friction:0.5});
-   
 
-    ground1 = Bodies.rectangle(100, 200, 500, 10, {isStatic: true, angle: Math.PI * 0.06});
-    ground2 = Bodies.rectangle(500, 500, 500, 10, {isStatic: true, angle: Math.PI * -0.06});
+    poly1A = Bodies.polygon(700, 100, 6, 20);
+    poly1B = Bodies.polygon(700, 250, 1, 50);
+
+    constraint1 = Constraint.create({
+        bodyA : poly1A,
+        point1A : {x: 0, y: 0},
+        bodyB : poly1B,
+        point1B : {x: -10, y: -10},
+        stiffness : 0.008
+    })
+
+
+    ground = Bodies.rectangle(width/2, height-20, 800, 10, {isStatic: true, angle: 0});
     
     // Add of all the bodies to the world
-    World.add(engine.world, [box1, ground1, ground2]);
+    World.add(engine.world, [ground, poly1A, poly1B, constraint1]);
 }
 
 // p5 draw() - called on each frame of the simulation
 function draw() {
     background(0);
     Engine.update(engine);
-
     fill(255);
-    drawVertices(box1.vertices);
+    drawVertices(poly1A.vertices);
+    drawVertices(poly1B.vertices);
 
-    generateObject(width/2, 0)
+    stroke(128);
+    strokeWeight(3);
+    drawConstraint(constraint1);
 
-    for (let i=0; i<boxes.length; i++)
-    {
-        drawVertices(boxes[i].vertices);
-        if (isOffScreen(boxes[i])){
-            World.remove(engine.world, boxes[i])
-            boxes.splice(i, 1);
-            i--
-        } 
-    }
 
-    fill(125);
-    drawVertices(ground1.vertices);
-    drawVertices(ground2.vertices);
-}
 
-function generateObject(x, y) {
-    const b = Bodies.rectangle(x,y, random(10,30), random(10,30), {restitution:.8, friction: .5})
-    boxes.push(b);
-    World.add(engine.world, [b]);
-}
-
-function isOffScreen(body){
-    var pos = body.position;
-    return (pos.y > height || pos.x < 0 || pos.x > width);
+    fill(128);
+    drawVertices(ground.vertices)
 }
 
 // Function to draw shapes to canvas
@@ -68,4 +61,28 @@ function drawVertices(vertices) {
         vertex(vertices[i].x, vertices[i].y)
     }
     endShape(CLOSE);
+}
+
+function drawConstraint(constraint)
+{
+    var offsetA = constraint.pointA;
+    var posA = {x:0, y:0};
+    if (constraint.bodyA) {
+        posA = constraint.bodyA.position;
+    }
+
+    var offsetB = constraint.pointB;
+
+    var posB = {x:0, y:0};
+
+    if (constraint.bodyB) {
+        posB = constraint.bodyB.position;
+    }
+
+    line(
+        posA.x + offsetA.x,
+        posA.y + offsetA.y,
+        posB.x + offsetB.x,
+        posB.y + offsetB.y,
+    );
 }
