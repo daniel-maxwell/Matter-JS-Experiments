@@ -10,6 +10,12 @@ var ground;
 var constraint1;
 var poly1A, poly1B;
 
+var poly2;
+var constraint2;
+
+var poly3;
+var constraint3;
+
 function setup() {
     createCanvas(900, 600);
 
@@ -18,6 +24,7 @@ function setup() {
 
     // Define shapes as Bodies instances
 
+    // Connect two bodies together
     poly1A = Bodies.polygon(700, 100, 6, 20);
     poly1B = Bodies.polygon(700, 250, 1, 50);
 
@@ -28,12 +35,33 @@ function setup() {
         point1B : {x: -10, y: -10},
         stiffness : 0.008
     })
+    World.add(engine.world, [poly1A, poly1B, constraint1]);
+
+
+    // Connect a body to a place in the world
+    poly2 = Bodies.polygon(300, 200, 5, 40);
+    constraint2 = Constraint.create({
+        pointA : {x: 150, y: 50},
+        bodyB : poly2,
+        pointB : {x: -10, y: -20},
+    })
+    World.add(engine.world, [poly2, constraint2]);
+
+
+    // Connect a body to a place in the world with elasticity
+    poly3 = Bodies.polygon(400, 100, 4, 30);
+    constraint3 = Constraint.create({
+        pointA : {x: 400, y: 120},
+        bodyB : poly3,
+        pointB : {x: -10, y: -10},
+        stiffness : 0.001,
+        damping : 0.05
+    })
+    World.add(engine.world, [poly3, constraint3]);
 
 
     ground = Bodies.rectangle(width/2, height-20, 800, 10, {isStatic: true, angle: 0});
-    
-    // Add of all the bodies to the world
-    World.add(engine.world, [ground, poly1A, poly1B, constraint1]);
+    World.add(engine.world, [ground]);
 }
 
 // p5 draw() - called on each frame of the simulation
@@ -43,12 +71,14 @@ function draw() {
     fill(255);
     drawVertices(poly1A.vertices);
     drawVertices(poly1B.vertices);
+    drawVertices(poly2.vertices);
+    drawVertices(poly3.vertices);
 
     stroke(128);
     strokeWeight(3);
     drawConstraint(constraint1);
-
-
+    drawConstraint(constraint2);
+    drawConstraint(constraint3);
 
     fill(128);
     drawVertices(ground.vertices)
