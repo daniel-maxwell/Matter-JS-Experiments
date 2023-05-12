@@ -4,6 +4,8 @@ var Engine = Matter.Engine,
     Bodies = Matter.Bodies
 
 var Constraint = Matter.Constraint;
+var MouseConstraint = Matter.MouseConstraint;
+var Mouse = Matter.Mouse;
 
 var engine;
 var ground;
@@ -16,8 +18,10 @@ var constraint2;
 var poly3;
 var constraint3;
 
+var canvas;
+
 function setup() {
-    createCanvas(900, 600);
+    canvas = createCanvas(900, 600);
 
     // Create an engine instance
     engine = Engine.create()
@@ -59,9 +63,19 @@ function setup() {
     })
     World.add(engine.world, [poly3, constraint3]);
 
-
     ground = Bodies.rectangle(width/2, height-20, 800, 10, {isStatic: true, angle: 0});
     World.add(engine.world, [ground]);
+
+    // Mouse
+    var mouse  = Mouse.create(canvas.elt);
+    var mouseParams = {
+        mouse: mouse
+    };
+
+    var mouseConstraint = MouseConstraint.create(engine, mouseParams);
+    mouseConstraint.mouse.pixelRation = pixelDensity();
+    World.add(engine.world, mouseConstraint);
+
 }
 
 // p5 draw() - called on each frame of the simulation
