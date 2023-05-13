@@ -1,12 +1,16 @@
 var Engine = Matter.Engine,
     Render = Matter.Render,
     World = Matter.World,
-    Bodies = Matter.Bodies
+    Bodies = Matter.Bodies,
+    Body = Matter.Body
 
 var engine;
 var box1;
-var ground1, ground2;
+var ground;
 var boxes = [];
+var propeller;
+var p_angle=0;
+var p_anglespeed = 0.1;
 
 function setup() {
     createCanvas(900, 600);
@@ -16,13 +20,12 @@ function setup() {
 
     // Define shapes as Bodies instances
     box1 = Bodies.rectangle(200, 200, 80, 80, {restitution: .8, friction:0.5});
-   
+    ground = Bodies.rectangle(500, 500, 500, 10, {isStatic: true, angle: Math.PI * -0.06});
 
-    ground1 = Bodies.rectangle(100, 200, 500, 10, {isStatic: true, angle: Math.PI * 0.06});
-    ground2 = Bodies.rectangle(500, 500, 500, 10, {isStatic: true, angle: Math.PI * -0.06});
+    propeller = Bodies.rectangle(width/2, height/2, 300, 15, {isStatic:true, angle: p_angle});
     
     // Add of all the bodies to the world
-    World.add(engine.world, [box1, ground1, ground2]);
+    World.add(engine.world, [box1, ground, propeller]);
 }
 
 // p5 draw() - called on each frame of the simulation
@@ -32,8 +35,13 @@ function draw() {
 
     fill(255);
     drawVertices(box1.vertices);
+    drawVertices(propeller.vertices);
+    p_angle += p_anglespeed;
+    Body.setAngle(propeller, p_angle);
+    Body.setAngularVelocity(propeller, p_anglespeed);
 
-    generateObject(width/2, 0)
+
+    if (random(1) < 0.2) generateObject(width/2, 0)
 
     for (let i=0; i<boxes.length; i++)
     {
@@ -46,8 +54,7 @@ function draw() {
     }
 
     fill(125);
-    drawVertices(ground1.vertices);
-    drawVertices(ground2.vertices);
+    drawVertices(ground.vertices);
 }
 
 function generateObject(x, y) {
